@@ -41,8 +41,6 @@ mvn clean install
 ```bash
 mvn spring-boot:run
 ```
-4. **访问项目**：
-   打开浏览器，访问`http://localhost:8080`，即可看到AI模拟面试系统的界面。
 
 ## 测试
 项目提供了基本的单元测试，你可以使用以下命令运行测试：
