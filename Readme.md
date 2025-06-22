@@ -63,5 +63,5 @@ mvn test
 
 ## 联系信息
 如果你有任何问题或建议，请通过以下方式联系我们：
-- **邮箱**：your-email@example.com
-- **GitHub Issues**：[https://github.com/your-repo/AIInterview_v2/issues ](https://github.com/your-repo/AIInterview_v2/issues )              
+- **邮箱**：1045466271@qq.com
+- **GitHub Issues**：[https://github.com/DorfranTom/AI-Simulated-Interview-System/issues ](https://github.com/DorfranTom/AI-Simulated-Interview-System/issues )              
