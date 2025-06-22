@@ -1,0 +1,126 @@
+@startuml
+skinparam monochrome true
+
+class InterviewSession {
+    -String sessionId
+    -String positionType
+    -String interviewTitle
+    -LocalDateTime startTime
+    -String candidateName
+    +addQuestion(InterviewQuestion question)
+    +removeQuestion(InterviewQuestion question)
+    +getLastQuestion()
+}
+
+class InterviewQuestion {
+    -String questionId
+    -String content
+    -String category
+    -InterviewDifficulty difficulty
+    -List<String> relatedKnowledgeNodes
+    -boolean isFollowUp
+    -String originalQuestionId
+    -LocalDateTime timestamp
+    +setAnswer(InterviewAnswer answer)
+}
+
+class InterviewAnswer {
+    -String answerId
+    -String questionId
+    -String content
+    -LocalDateTime timestamp
+    -double evaluationScore
+    +setQuestion(InterviewQuestion question)
+}
+
+class AnswerEvaluation {
+    -double overallScore
+    -boolean hasCriticalFlaw
+    -Map<String, Double> dimensionScores
+    -List<String> knowledgeGaps
+    -List<String> suggestions
+}
+
+class InterviewReport {
+    -String sessionId
+    -String positionType
+    -LocalDateTime startTime
+    -LocalDateTime endTime
+    -double overallScore
+    -List<String> knowledgeGaps
+    -List<String> suggestions
+    +setInterviewRecords(List<InterviewQuestion> questions, List<InterviewAnswer> answers)
+}
+
+class InterviewController {
+    -InterviewService interviewService
+    +getAllSessions()
+    +createInterview(InterviewSession session)
+}
+
+interface InterviewService {
+    +startInterview(String candidateName, String positionType)
+    +submitAnswer(String sessionId, String questionId, String answerContent)
+    +getSession(String sessionId)
+    +getAllSessions()
+    +completeInterview(String sessionId)
+    +getQuestionsBySession(String sessionId)
+    +getAnswersBySession(String sessionId)
+    +saveInterview(InterviewSession session)
+}
+
+class InterviewServiceImpl implements InterviewService {
+    -InterviewSessionRepository sessionRepository
+    -InterviewQuestionRepository questionRepository
+    -InterviewAnswerRepository answerRepository
+    +startInterview(String candidateName, String positionType)
+    +submitAnswer(String sessionId, String questionId, String answerContent)
+    +getSession(String sessionId)
+    +getAllSessions()
+    +completeInterview(String sessionId)
+    +getQuestionsBySession(String sessionId)
+    +getAnswersBySession(String sessionId)
+    +saveInterview(InterviewSession session)
+}
+
+interface QuestionGenerator {
+    +generateQuestions(String positionType, InterviewDifficulty difficulty)
+    +generateFollowUpQuestion(String userAnswer, InterviewQuestion previousQuestion, InterviewDifficulty difficulty)
+    +generateNextQuestion(String positionType, InterviewDifficulty difficulty)
+    +generateQuestions(int num)
+    +generateFirstQuestion()
+}
+
+class TongyiQuestionGenerator implements QuestionGenerator {
+    +generateQuestions(String positionType, InterviewDifficulty difficulty)
+    +generateFollowUpQuestion(String userAnswer, InterviewQuestion previousQuestion, InterviewDifficulty difficulty)
+    +generateNextQuestion(String positionType, InterviewDifficulty difficulty)
+    +generateQuestions(int num)
+    +generateFirstQuestion()
+}
+
+interface AnswerEvaluator {
+    +evaluate(String userAnswer, InterviewQuestion question)
+    +evaluateAnswer(String questionId, String answer)
+    +generateFeedback(String questionId, String answer)
+}
+
+class TongyiAnswerEvaluator implements AnswerEvaluator {
+    +evaluate(String userAnswer, InterviewQuestion question)
+    +evaluateAnswer(String questionId, String answer)
+    +generateFeedback(String questionId, String answer)
+}
+
+InterviewSession "1" *-- "*" InterviewQuestion : contains
+InterviewQuestion "1" *-- "1" InterviewAnswer : has
+InterviewAnswer "1" -- "1" AnswerEvaluation : has
+InterviewSession "1" -- "1" InterviewReport : generates
+
+InterviewController "1" -- "1" InterviewService : uses
+InterviewServiceImpl "1" -- "1" InterviewSessionRepository : uses
+InterviewServiceImpl "1" -- "1" InterviewQuestionRepository : uses
+InterviewServiceImpl "1" -- "1" InterviewAnswerRepository : uses
+InterviewServiceImpl "1" -- "1" QuestionGenerator : uses
+InterviewServiceImpl "1" -- "1" AnswerEvaluator : uses
+
+@enduml

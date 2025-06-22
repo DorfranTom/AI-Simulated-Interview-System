@@ -1,0 +1,97 @@
+@startuml
+skinparam monochrome true
+
+interface InterviewService {
+    +startInterview(String candidateName, String positionType, InterviewDifficulty difficulty)
+    +submitAnswer(String sessionId, String questionId, String answerContent)
+    +getSession(String sessionId)
+    +getAllSessions()
+    +completeInterview(String sessionId)
+    +getQuestionsBySession(String sessionId)
+    +getAnswersBySession(String sessionId)
+    +saveInterview(InterviewSession session)
+}
+
+class InterviewServiceImpl implements InterviewService {
+    -InterviewSessionRepository sessionRepository
+    -InterviewQuestionRepository questionRepository
+    -InterviewAnswerRepository answerRepository
+    -QuestionGenerator questionGenerator
+    -AnswerEvaluator answerEvaluator
+    -ReportGenerator reportGenerator
+    +startInterview(String candidateName, String positionType, InterviewDifficulty difficulty)
+    +submitAnswer(String sessionId, String questionId, String answerContent)
+    +getSession(String sessionId)
+    +getAllSessions()
+    +completeInterview(String sessionId)
+    +getQuestionsBySession(String sessionId)
+    +getAnswersBySession(String sessionId)
+    +saveInterview(InterviewSession session)
+}
+
+interface QuestionGenerator {
+    +generateInitialQuestions(String positionType, InterviewDifficulty difficulty, int count)
+    +generateFollowUpQuestion(String userAnswer, InterviewQuestion previousQuestion)
+    +buildQuestionPrompt(String positionType, InterviewDifficulty difficulty, String context)
+}
+
+class TongyiQuestionGenerator implements QuestionGenerator {
+    -String apiKey
+    -int maxTokens
+    -double temperature
+    +generateInitialQuestions(String positionType, InterviewDifficulty difficulty, int count)
+    +generateFollowUpQuestion(String userAnswer, InterviewQuestion previousQuestion)
+    +buildQuestionPrompt(String positionType, InterviewDifficulty difficulty, String context)
+}
+
+interface AnswerEvaluator {
+    +evaluateAnswer(InterviewQuestion question, String userAnswer)
+    +buildEvaluationPrompt(InterviewQuestion question, String userAnswer)
+}
+
+class TongyiAnswerEvaluator implements AnswerEvaluator {
+    -String apiKey
+    -int maxTokens
+    -double temperature
+    +evaluateAnswer(InterviewQuestion question, String userAnswer)
+    +buildEvaluationPrompt(InterviewQuestion question, String userAnswer)
+}
+
+interface ReportGenerator {
+    +generateReport(InterviewSession session)
+}
+
+class InterviewReportGenerator implements ReportGenerator {
+    +generateReport(InterviewSession session)
+}
+
+interface InterviewRepository<T> {
+    +save(T entity)
+    +findById(String id)
+    +findAll()
+    +delete(T entity)
+}
+
+class InterviewSessionRepository implements InterviewRepository<InterviewSession> {
+    // JPA implementation
+}
+
+class InterviewQuestionRepository implements InterviewRepository<InterviewQuestion> {
+    // JPA implementation
+}
+
+class InterviewAnswerRepository implements InterviewRepository<InterviewAnswer> {
+    // JPA implementation
+}
+
+InterviewServiceImpl "1" -- "1" QuestionGenerator : uses
+InterviewServiceImpl "1" -- "1" AnswerEvaluator : uses
+InterviewServiceImpl "1" -- "1" ReportGenerator : uses
+InterviewServiceImpl "1" -- "1" InterviewSessionRepository : uses
+InterviewServiceImpl "1" -- "1" InterviewQuestionRepository : uses
+InterviewServiceImpl "1" -- "1" InterviewAnswerRepository : uses
+
+TongyiQuestionGenerator "1" ..> "1" InterviewQuestion : creates
+TongyiAnswerEvaluator "1" ..> "1" AnswerEvaluation : creates
+InterviewReportGenerator "1" ..> "1" InterviewReport : creates
+@enduml

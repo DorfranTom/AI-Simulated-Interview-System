@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI模拟面试系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #question {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #response {
+            margin-top: 20px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>AI模拟面试系统</h1>
+    <div id="question">正在加载问题...</div>
+    <textarea id="answer" rows="4" placeholder="请输入你的回答"></textarea>
+    <button onclick="submitAnswer()">提交回答</button>
+    <div id="response"></div>
+</div>
+
+<script>
+    let sessionId;
+
+    // 开始面试，获取第一个问题
+    function startInterview() {
+        const positionType = "技术岗"; // 可根据实际情况修改岗位类型
+        fetch('/api/interview/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ positionType: positionType })
+        })
+            .then(response => response.json())
+            .then(data => {
+                sessionId = data.sessionId;
+                const question = data.firstQuestion.content;
+                document.getElementById('question').textContent = question;
+            })
+            .catch(error => console.error('面试开始失败:', error));
+    }
+
+    // 提交回答并获取下一个问题
+    function submitAnswer() {
+        const answer = document.getElementById('answer').value;
+        if (!answer) {
+            alert('请输入你的回答');
+            return;
+        }
+        fetch('/api/interview/answer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionId: sessionId, userAnswer: answer })
+        })
+            .then(response => response.json())
+            .then(data => {
+                const nextQuestion = data.nextQuestion;
+                if (nextQuestion) {
+                    document.getElementById('question').textContent = nextQuestion.content;
+                    document.getElementById('answer').value = '';
+                } else {
+                    document.getElementById('response').textContent = '面试结束，感谢参与！';
+                    document.getElementById('answer').disabled = true;
+                    document.getElementById('submit').disabled = true;
+                }
+            })
+            .catch(error => console.error('提交回答失败:', error));
+    }
+
+    // 页面加载完成后开始面试
+    window.onload = startInterview;
+</script>
+</body>
+
+</html>

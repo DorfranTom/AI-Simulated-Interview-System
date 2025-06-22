@@ -1,0 +1,88 @@
+@startuml
+skinparam monochrome true
+
+class InterviewSession {
+    -String sessionId
+    -String positionType
+    -String interviewTitle
+    -LocalDateTime startTime
+    -LocalDateTime endTime
+    -String candidateName
+    -InterviewStatus status
+    +addQuestion(InterviewQuestion question)
+    +removeQuestion(InterviewQuestion question)
+    +getLastQuestion()
+    +isCompleted()
+}
+
+enum InterviewStatus {
+    CREATED
+    IN_PROGRESS
+    PAUSED
+    COMPLETED
+    CANCELLED
+}
+
+enum InterviewDifficulty {
+    EASY
+    MEDIUM
+    HARD
+}
+
+class InterviewQuestion {
+    -String questionId
+    -String content
+    -String category
+    -InterviewDifficulty difficulty
+    -List<String> relatedKnowledgeNodes
+    -boolean isFollowUp
+    -String originalQuestionId
+    -LocalDateTime timestamp
+    +setAnswer(InterviewAnswer answer)
+    +getAnswer()
+}
+
+class InterviewAnswer {
+    -String answerId
+    -String questionId
+    -String content
+    -LocalDateTime timestamp
+    -AnswerEvaluation evaluation
+    +setQuestion(InterviewQuestion question)
+    +getQuestion()
+}
+
+class AnswerEvaluation {
+    -double overallScore
+    -boolean hasCriticalFlaw
+    -Map<String, Double> dimensionScores
+    -List<String> knowledgeGaps
+    -List<String> suggestions
+    +getFormattedReport()
+}
+
+class InterviewReport {
+    -String sessionId
+    -String positionType
+    -LocalDateTime startTime
+    -LocalDateTime endTime
+    -double overallScore
+    -List<String> knowledgeGaps
+    -List<String> suggestions
+    -List<InterviewRecord> records
+    +generatePDFReport()
+    +generateJSONReport()
+}
+
+class InterviewRecord {
+    -InterviewQuestion question
+    -InterviewAnswer answer
+    -AnswerEvaluation evaluation
+}
+
+InterviewSession "1" *-- "*" InterviewQuestion : contains
+InterviewQuestion "1" *-- "1" InterviewAnswer : has
+InterviewAnswer "1" *-- "1" AnswerEvaluation : has
+InterviewSession "1" *-- "1" InterviewReport : generates
+InterviewReport "1" *-- "*" InterviewRecord : contains
+@enduml

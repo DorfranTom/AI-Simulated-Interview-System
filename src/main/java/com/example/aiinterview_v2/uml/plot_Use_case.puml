@@ -1,0 +1,44 @@
+@startuml
+title AI+模拟面试系统
+
+actor 候选人 as Candidate
+actor 系统管理员 as Admin
+actor 通义千问API as AI
+
+rectangle "模拟面试功能" {
+    (创建面试会话) as UC1
+    (AI生成面试问题) as UC2
+    (AI生成追问) as UC3
+    (提交面试回答) as UC4
+    (AI评估回答) as UC5
+    (生成面试报告) as UC6
+    (管理面试配置) as UC7
+    (管理AI模型参数) as UC8
+
+    Candidate -- UC1 : 发起
+    Candidate -- UC4 : 执行
+
+    Admin -- UC7 : 管理
+    Admin -- UC8 : 配置
+
+    AI -- UC2 : 执行
+    AI -- UC3 : 执行
+    AI -- UC5 : 执行
+
+    UC1 --> UC2 : 触发
+    UC4 --> UC3 : 触发
+    UC4 --> UC5 : 触发
+    UC5 --> UC6 : 触发
+
+    (数据库服务) as Service
+    UC1 --> Service : 依赖
+    UC2 --> Service : 依赖
+    UC3 --> Service : 依赖
+    UC4 --> Service : 依赖
+    UC5 --> Service : 依赖
+    UC6 --> Service : 依赖
+    UC7 --> Service : 依赖
+}
+
+AI ..> Service : 读取配置
+@enduml

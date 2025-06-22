@@ -1,0 +1,45 @@
+@startuml
+title AI+模拟面试系统组件图
+
+package "前端界面" {
+    component "候选人界面" as CandidateUI
+    component "管理员界面" as AdminUI
+}
+
+package "后端服务" {
+    component "REST API" as API
+    component "面试服务" as InterviewService
+    component "问题生成服务" as QuestionService
+    component "回答评估服务" as EvaluationService
+    component "报告生成服务" as ReportService
+    component "安全认证服务" as AuthService
+}
+
+package "数据存储" {
+    database "面试会话数据库" as SessionDB
+    database "问题库" as QuestionDB
+    database "评估标准库" as CriteriaDB
+}
+
+package "外部服务" {
+    component "通义千问API" as TongyiAPI
+}
+
+CandidateUI --> API : HTTP请求
+AdminUI --> API : HTTP请求
+
+API --> InterviewService : 调用
+API --> AuthService : 验证
+
+InterviewService --> QuestionService : 调用
+InterviewService --> EvaluationService : 调用
+InterviewService --> ReportService : 调用
+
+QuestionService --> TongyiAPI : API调用
+EvaluationService --> TongyiAPI : API调用
+
+InterviewService --> SessionDB : 读写
+QuestionService --> QuestionDB : 读写
+EvaluationService --> CriteriaDB : 读取
+
+@enduml

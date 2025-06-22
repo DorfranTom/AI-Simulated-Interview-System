@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 模拟面试系统</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      background-color: #f4f4f9;
+    }
+
+    /* 左侧面试记录框 */
+    .interview-record {
+      width: 30%;
+      height: 100vh;
+      background-color: #e9e9f4;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      margin-top: 60px; /* 为标题和按钮留出空间 */
+    }
+
+    /* 中间交互区域 */
+    .interaction-area {
+      width: 70%;
+      height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+      margin-top: 60px; /* 为标题和按钮留出空间 */
+    }
+
+    /* 系统标题和新建面试按钮容器 */
+    .header-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 系统标题 */
+    .system-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-right: 20px; /* 为按钮留出间距 */
+    }
+
+    /* 新建面试按钮 */
+    #new-interview-btn {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #new-interview-btn:hover {
+      background-color: #0056b3;
+    }
+
+    /* 问题和回答显示区域 */
+    .qa-container {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      background-color: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .question {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .answer {
+      font-size: 16px;
+      color: #555;
+      white-space: pre-wrap;
+    }
+
+    /* 回答输入框 */
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
+
+    /* 按钮组 */
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* 模态框 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 30%;
+      border-radius: 8px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* 初始化界面 */
+    #init-screen {
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    #init-screen h2 {
+      font-size: 32px;
+      color: #333;
+    }
+
+    #init-screen p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+<!-- 系统标题和新建面试按钮容器 -->
+<div class="header-container">
+  <!-- 系统标题 -->
+  <div class="system-title">AI 模拟面试系统</div>
+  <!-- 新建面试按钮 -->
+  <button id="new-interview-btn" onclick="openModal()">新建面试</button>
+</div>
+
+<!-- 左侧面试记录框 -->
+<div class="interview-record" id="interview-record">
+  <!-- 面试记录将通过 JavaScript 动态添加 -->
+</div>
+
+<!-- 中间交互区域 -->
+<div class="interaction-area">
+  <!-- 初始化界面 -->
+  <div id="init-screen">
+    <h2>欢迎来到 AI 模拟面试系统</h2>
+    <p>在这里，您可以体验真实的面试场景，提升面试技巧。</p>
+    <p>点击左侧的"新建面试"按钮，即可开始您的面试之旅。</p>
+  </div>
+
+  <!-- 面试内容显示区域 -->
+  <div id="interview-content" style="display: none;">
+    <!-- 面试标题 -->
+    <h2 id="interview-title-display"></h2>
+
+    <!-- 问题和回答将动态添加到这里 -->
+    <div id="qa-history"></div>
+
+    <!-- 当前问题 -->
+    <div class="qa-container">
+      <div class="question" id="current-question"></div>
+      <textarea id="answer" rows="4" placeholder="请输入你的回答"></textarea>
+
+      <!-- 按钮组 -->
+      <div class="button-group">
+        <button id="finish-answer-btn" onclick="finishAnswer()">完成回答</button>
+        <button id="next-question-btn" onclick="submitAnswer()" disabled>下一题</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 模态框 -->
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>新建面试</h2>
+    <label for="interview-title">面试标题:</label>
+    <input type="text" id="interview-title" placeholder="请输入面试标题"><br>
+    <label for="position">岗位选择:</label>
+    <select id="position">
+      <option value="技术岗">技术岗</option>
+      <option value="销售岗">销售岗</option>
+      <option value="设计岗">设计岗</option>
+    </select>
+    <br>
+    <label for="language">语言选择:</label>
+    <select id="language">
+      <option value="中文">中文</option>
+      <option value="英文">英文</option>
+    </select>
+    <br>
+    <label for="difficulty">难度选择:</label>
+    <select id="difficulty">
+      <option value="EASY">简单</option>
+      <option value="MEDIUM">中等</option>
+      <option value="HARD">困难</option>
+      <option value="VERY_HARD">极难</option>
+    </select>
+    <br>
+    <button onclick="startNewInterview()">开始面试</button>
+  </div>
+</div>
+
+<script>
+  let sessionId;
+  let interviewTitle;
+  let currentQuestion = null;
+  let interviewRecord = [];
+
+  // 打开模态框
+  function openModal() {
+    document.getElementById("myModal").style.display = "block";
+  }
+
+  // 关闭模态框
+  function closeModal() {
+    document.getElementById("myModal").style.display = "none";
+  }
+
+  // 开始新面试
+  function startNewInterview() {
+    interviewTitle = document.getElementById("interview-title").value;
+    if (!interviewTitle) {
+      alert('请输入面试标题');
+      return;
+    }
+    const positionType = document.getElementById("position").value;
+    const language = document.getElementById("language").value;
+    const difficulty = document.getElementById("difficulty").value;
+
+    // 隐藏初始化界面，显示面试区域
+    document.getElementById("init-screen").style.display = "none";
+    document.getElementById("interview-content").style.display = "block";
+    document.getElementById("interview-title-display").textContent = interviewTitle;
+
+    // 开始面试
+    startInterview(positionType, interviewTitle);
+
+    closeModal();
+  }
+
+  // 开始面试，获取第一个问题
+  function startInterview(positionType, interviewTitle) {
+    fetch('/api/interview/start', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        positionType: positionType,
+        interviewTitle: interviewTitle
+      })
+    })
+            .then(response => response.json())
+            .then(data => {
+              sessionId = data.sessionId;
+              currentQuestion = data.firstQuestion.content;
+              document.getElementById('current-question').textContent = currentQuestion;
+
+              // 在左侧显示面试标题
+              const interviewRecordDiv = document.getElementById('interview-record');
+              const titleElement = document.createElement('div');
+              titleElement.className = 'interview-title';
+              titleElement.textContent = interviewTitle;
+              interviewRecordDiv.appendChild(titleElement);
+
+              // 添加分隔线
+              const separator = document.createElement('hr');
+              interviewRecordDiv.appendChild(separator);
+            })
+            .catch(error => console.error('面试开始失败:', error));
+  }
+
+  // 完成回答
+  function finishAnswer() {
+    const answer = document.getElementById('answer').value;
+    if (!answer) {
+      alert('请输入你的回答');
+      return;
+    }
+
+    // 将当前问题和回答添加到历史记录
+    addToHistory(currentQuestion, answer);
+
+    // 启用下一题按钮
+    document.getElementById('next-question-btn').disabled = false;
+    document.getElementById('finish-answer-btn').disabled = true;
+  }
+
+  // 将问题和回答添加到历史记录
+  function addToHistory(question, answer) {
+    const historyDiv = document.getElementById('qa-history');
+
+    // 创建新的问答容器
+    const qaContainer = document.createElement('div');
+    qaContainer.className = 'qa-container';
+
+    // 添加问题
+    const questionElement = document.createElement('div');
+    questionElement.className = 'question';
+    questionElement.textContent = question;
+    qaContainer.appendChild(questionElement);
+
+    // 添加回答
+    const answerElement = document.createElement('div');
+    answerElement.className = 'answer';
+    answerElement.textContent = answer;
+    qaContainer.appendChild(answerElement);
+
+    // 添加到历史记录
+    historyDiv.appendChild(qaContainer);
+
+    // 保存到面试记录
+    interviewRecord.push({ question, answer });
+
+    // 清空输入框
+    document.getElementById('answer').value = '';
+  }
+
+  // 提交回答并获取下一个问题
+  function submitAnswer() {
+    const answer = document.getElementById('answer').value;
+
+    fetch('/api/interview/answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        userAnswer: answer
+      })
+    })
+            .then(response => response.json())
+            .then(data => {
+              const nextQuestion = data.nextQuestion;
+              if (nextQuestion) {
+                currentQuestion = nextQuestion.content;
+                document.getElementById('current-question').textContent = currentQuestion;
+
+                // 重置按钮状态
+                document.getElementById('next-question-btn').disabled = true;
+                document.getElementById('finish-answer-btn').disabled = false;
+
+                // 更新左侧面试记录
+                updateInterviewRecord();
+              } else {
+                document.getElementById('current-question').textContent = '面试结束，感谢参与！';
+                document.getElementById('answer').disabled = true;
+                document.getElementById('finish-answer-btn').disabled = true;
+                document.getElementById('next-question-btn').disabled = true;
+              }
+            })
+            .catch(error => console.error('提交回答失败:', error));
+  }
+
+  // 更新面试记录框
+  function updateInterviewRecord() {
+    const recordDiv = document.getElementById('interview-record');
+
+    // 清除现有内容
+    recordDiv.innerHTML = '';
+
+    // 添加面试标题
+    const titleElement = document.createElement('div');
+    titleElement.className = 'interview-title';
+    titleElement.textContent = interviewTitle;
+    recordDiv.appendChild(titleElement);
+
+    // 添加分隔线
+    const separator = document.createElement('hr');
+    recordDiv.appendChild(separator);
+
+    // 添加所有问题和回答
+    interviewRecord.forEach((item, index) => {
+      const questionElement = document.createElement('p');
+      questionElement.textContent = `问题 ${index + 1}: ${item.question}`;
+      recordDiv.appendChild(questionElement);
+
+      const answerElement = document.createElement('p');
+      answerElement.textContent = `回答: ${item.answer}`;
+      recordDiv.appendChild(answerElement);
+
+      const hr = document.createElement('hr');
+      recordDiv.appendChild(hr);
+    });
+  }
+
+  // 页面加载完成后显示初始化界面
+  window.onload = function() {
+    document.getElementById("init-screen").style.display = "block";
+  };
+</script>
+</body>
+
+</html>
